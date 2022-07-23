@@ -10,6 +10,10 @@ class BottomWidgets extends StatefulWidget {
 }
 
 class _BottomWidgetsState extends State<BottomWidgets> {
+  static const _divider = Divider(
+    thickness: 1.0,
+    height: 0.0,
+  );
   static const _iconSize = 24.0;
   static const _iconColor = Colors.white;
 
@@ -22,11 +26,16 @@ class _BottomWidgetsState extends State<BottomWidgets> {
 
   @override
   Widget build(BuildContext context) {
-    return ButtonBar(
-      alignment: MainAxisAlignment.center,
+    return Column(
       children: [
-        _createButton(_goToHome, "Home"),
-        _createButton(_goToList, "List"),
+        _divider,
+        ButtonBar(
+          alignment: MainAxisAlignment.center,
+          children: [
+            _createButton(_goToHome, Icons.home_outlined, "Home"),
+            _createButton(_goToList, Icons.list_alt_outlined, "List"),
+          ],
+        ),
       ],
     );
   }
@@ -39,13 +48,13 @@ class _BottomWidgetsState extends State<BottomWidgets> {
     Navigator.pushNamed(context, ShoppingListScreen.routeName);
   }
 
-  Widget _createButton(void Function() fun, String text) {
+  Widget _createButton(void Function() fun, IconData icon, String text) {
     return ElevatedButton(
       onPressed: fun,
       style: _pageButtonStyle,
       child: Column(
         children: [
-          _createIcon(Icons.list_alt_outlined),
+          _createIcon(icon),
           Text(text),
         ],
       ),
