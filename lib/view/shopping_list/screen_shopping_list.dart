@@ -30,6 +30,14 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
 
   static final _itemController = TextEditingController();
   static final _amountController = TextEditingController();
+  static final _amountTextStyle = TextStyle(
+    fontSize: 14.0,
+    fontWeight: FontWeight.w600,
+    color: Colors.black.withOpacity(0.5),
+  );
+  static final _itemTextStyle = TextStyle(
+    fontSize: 20.0,
+  );
 
   static List<ShoppingItemModel> _shoppingList = [];
   static List<IsCheckedModel> _isChecked = [];
@@ -59,7 +67,7 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
                   primary: Colors.blueAccent,
                   side: _borderSide,
                 ),
-                child: const Text("Add"),
+                child: const Text("Dodaj"),
               ),
               _horizontalMargin,
               OutlinedButton(
@@ -69,13 +77,28 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
                   primary: Colors.red,
                   side: _borderSide.copyWith(color: Colors.red),
                 ),
-                child: const Text("Clear All"),
+                child: const Text("Wyczyść"),
               ),
             ],
           ),
           _verticalMargin,
           Row(
             children: [
+              Expanded(
+                flex: 3,
+                child: TextField(
+                  controller: _amountController,
+                  decoration: const InputDecoration(
+                    isDense: true,
+                    contentPadding: _textFieldPadding,
+                    border: OutlineInputBorder(
+                      borderSide: _borderSide,
+                    ),
+                    labelText: "Ilość",
+                  ),
+                ),
+              ),
+              _horizontalMargin,
               Expanded(
                 flex: 9,
                 child: TextField(
@@ -87,22 +110,7 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
                     border: OutlineInputBorder(
                       borderSide: _borderSide,
                     ),
-                    labelText: "Item",
-                  ),
-                ),
-              ),
-              _horizontalMargin,
-              Expanded(
-                flex: 3,
-                child: TextField(
-                  controller: _amountController,
-                  decoration: const InputDecoration(
-                    isDense: true,
-                    contentPadding: _textFieldPadding,
-                    border: OutlineInputBorder(
-                      borderSide: _borderSide,
-                    ),
-                    labelText: "Amount",
+                    labelText: "Przedmiot*",
                   ),
                 ),
               ),
@@ -121,6 +129,7 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
                   children: [
                     _verticalMargin,
                     Container(
+                      padding: EdgeInsets.symmetric(vertical: 4.0),
                       decoration: BoxDecoration(
                         border: Border.all(
                           color: Colors.blueAccent,
@@ -143,16 +152,34 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
                               saveData();
                             },
                           ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(_shoppingList.elementAt(index).name),
-                              Text(_shoppingList.elementAt(index).amount),
-                            ],
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _shoppingList.elementAt(index).amount.trim() !=
+                                        ""
+                                    ? Text(
+                                        "Ilość: ${_shoppingList.elementAt(index).amount}",
+                                        style: _amountTextStyle,
+                                        softWrap: true,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.clip,
+                                      )
+                                    : const SizedBox.shrink(),
+                                Text(
+                                  _shoppingList.elementAt(index).name,
+                                  style: _itemTextStyle,
+                                  softWrap: true,
+                                  maxLines: 10,
+                                  overflow: TextOverflow.fade,
+                                ),
+                              ],
+                            ),
                           ),
-                          Spacer(),
                           IconButton(
                             onPressed: () => _handleEditPress(index),
+                            padding: EdgeInsets.symmetric(horizontal: 8.0),
+                            constraints: BoxConstraints(),
                             icon: const Icon(
                               Icons.edit_outlined,
                               color: Colors.blueAccent,
@@ -161,6 +188,8 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
                           ),
                           IconButton(
                             onPressed: () => _handleRemovePress(index),
+                            padding: EdgeInsets.only(right: 4.0),
+                            constraints: BoxConstraints(),
                             icon: const Icon(
                               Icons.remove_circle_outline,
                               color: Colors.red,
@@ -194,22 +223,22 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text("Edit"),
+        title: Text("Edycja"),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextFormField(
-              decoration: InputDecoration(helperText: "Item"),
-              initialValue: _shoppingList.elementAt(index).name,
-              onChanged: (name) => setState(() {
-                _shoppingList.elementAt(index).name = name;
-              }),
-            ),
-            TextFormField(
-              decoration: InputDecoration(helperText: "Amount"),
+              decoration: InputDecoration(helperText: "Ilość"),
               initialValue: _shoppingList.elementAt(index).amount,
               onChanged: (amount) => setState(() {
                 _shoppingList.elementAt(index).amount = amount;
+              }),
+            ),
+            TextFormField(
+              decoration: InputDecoration(helperText: "Przedmiot*"),
+              initialValue: _shoppingList.elementAt(index).name,
+              onChanged: (name) => setState(() {
+                _shoppingList.elementAt(index).name = name;
               }),
             ),
             Row(
@@ -220,7 +249,7 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
                     saveData();
                     Navigator.of(context).pop();
                   },
-                  child: Text("Confirm"),
+                  child: Text("Zatwierdź"),
                   style: ElevatedButton.styleFrom(
                     primary: Colors.greenAccent,
                     textStyle: TextStyle(
@@ -247,9 +276,7 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
 
   void _handleAddPress(int index) {
     if (_itemController.text.trim() == "") return;
-    if (_amountController.text.trim() == "") {
-      _amountController.text = " ";
-    }
+
     ShoppingItemModel shoppingItem = ShoppingItemModel(
       id: index,
       name: _itemController.text,
