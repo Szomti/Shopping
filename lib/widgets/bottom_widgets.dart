@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:shopping/models/model_additional_options.dart';
 import 'package:shopping/view/shopping_list/screen_shopping_list.dart';
 import 'package:shopping/widgets/basic_scaffold.dart';
 
 class BottomWidgets extends StatefulWidget {
-  const BottomWidgets({Key? key}) : super(key: key);
+  final AdditionalOptionsModel? additionalOptions;
+
+  const BottomWidgets({
+    this.additionalOptions,
+    Key? key,
+  }) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _BottomWidgetsState();
@@ -24,6 +30,8 @@ class _BottomWidgetsState extends State<BottomWidgets> {
     padding: const EdgeInsets.all(BasicScaffold.marginValue / 3),
   );
 
+  AdditionalOptionsModel? get additionalOptions => widget.additionalOptions;
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -41,11 +49,20 @@ class _BottomWidgetsState extends State<BottomWidgets> {
   }
 
   void _goToHome() {
-    Navigator.pushNamedAndRemoveUntil(context, "/homeScreen", (r) => false);
+    Navigator.pushNamedAndRemoveUntil(
+      context,
+      "/homeScreen",
+      (r) => false,
+      arguments: additionalOptions,
+    );
   }
 
   void _goToList() {
-    Navigator.pushNamed(context, ShoppingListScreen.routeName);
+    Navigator.pushNamed(
+      context,
+      ShoppingListScreen.routeName,
+      arguments: additionalOptions,
+    );
   }
 
   Widget _createButton(void Function() fun, IconData icon, String text) {

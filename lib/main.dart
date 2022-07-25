@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shopping/models/model_additional_options.dart';
 import 'package:shopping/view/main/screen_home.dart';
 import 'package:shopping/view/shopping_list/screen_shopping_list.dart';
 
@@ -18,17 +19,26 @@ class MyApp extends StatelessWidget {
           case HomeScreen.routeName:
             {
               return PageRouteBuilder(
-                  pageBuilder: (a, b, c) => const HomeScreen());
+                pageBuilder: (a, b, c) => HomeScreen(
+                  settings.arguments as AdditionalOptionsModel?,
+                ),
+              );
             }
           case ShoppingListScreen.routeName:
             {
               return PageRouteBuilder(
-                  pageBuilder: (a, b, c) => const ShoppingListScreen());
+                pageBuilder: (a, b, c) => ShoppingListScreen(
+                  settings.arguments as AdditionalOptionsModel?,
+                ),
+              );
             }
           default:
             {
               return PageRouteBuilder(
-                  pageBuilder: (a, b, c) => const HomeScreen());
+                pageBuilder: (a, b, c) => HomeScreen(
+                  settings.arguments as AdditionalOptionsModel?,
+                ),
+              );
             }
         }
       },

@@ -4,11 +4,13 @@ class ShoppingItemModel {
   final int id;
   String name;
   String amount;
+  double? price;
 
   ShoppingItemModel({
     required this.id,
     required this.name,
     required this.amount,
+    this.price,
   });
 
   factory ShoppingItemModel.fromJson(Map<String, dynamic> jsonData) {
@@ -16,6 +18,7 @@ class ShoppingItemModel {
       id: jsonData['id'],
       name: jsonData['name'],
       amount: jsonData['amount'],
+      price: jsonData['price'],
     );
   }
 
@@ -23,6 +26,7 @@ class ShoppingItemModel {
         'id': shoppingItem.id,
         'name': shoppingItem.name,
         'amount': shoppingItem.amount,
+        'price': shoppingItem.price,
       };
 
   static String encode(List<ShoppingItemModel> shoppingList) => json.encode(
