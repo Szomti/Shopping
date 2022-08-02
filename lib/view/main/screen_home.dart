@@ -43,6 +43,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return BasicScaffold(
+      bottomWidgets: BottomWidgets(additionalOptions: _additionalOptions),
       body: Column(
         children: [
           const Expanded(
@@ -95,7 +96,6 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
           ),
-          BottomWidgets(additionalOptions: _additionalOptions),
         ],
       ),
     );
@@ -109,11 +109,11 @@ class _HomeScreenState extends State<HomeScreen> {
   loadData() async {
     SharedPref sharedPref = SharedPref();
     try {
-      AdditionalOptionsModel additionalOptions =
+      AdditionalOptionsModel savedAdditionalOptions =
           AdditionalOptionsModel.fromJson(
               await sharedPref.read("additional_options"));
       setState(() {
-        _additionalOptions = additionalOptions;
+        _additionalOptions = savedAdditionalOptions;
       });
     } catch (_) {}
   }

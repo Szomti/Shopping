@@ -47,7 +47,7 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
     fontWeight: FontWeight.w600,
     color: Colors.green.shade900.withOpacity(0.9),
   );
-  static final _itemTextStyle = const TextStyle(
+  static const _itemTextStyle = TextStyle(
     fontSize: 20.0,
   );
 
@@ -80,6 +80,7 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
   Widget build(BuildContext context) {
     return BasicScaffold(
       alignment: Alignment.topLeft,
+      bottomWidgets: BottomWidgets(additionalOptions: additionalOptions),
       body: Column(
         children: [
           _verticalMargin,
@@ -103,7 +104,6 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
           additionalOptions!.usersPrice == true
               ? _createTotalPrice()
               : const SizedBox.shrink(),
-          BottomWidgets(additionalOptions: additionalOptions),
         ],
       ),
     );

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:shopping/models/model_additional_options.dart';
 import 'package:shopping/view/main/screen_home.dart';
 import 'package:shopping/view/shopping_list/screen_shopping_list.dart';
@@ -12,6 +13,9 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+    ]);
     return MaterialApp(
       initialRoute: HomeScreen.routeName,
       onGenerateRoute: (settings) {

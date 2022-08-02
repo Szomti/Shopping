@@ -3,10 +3,12 @@ import 'package:flutter/material.dart';
 class BasicScaffold extends StatefulWidget {
   static const double marginValue = 16.0;
   final Alignment? alignment;
+  final Widget? bottomWidgets;
   final Widget body;
 
   const BasicScaffold({
     this.alignment,
+    this.bottomWidgets,
     required this.body,
     Key? key,
   }) : super(key: key);
@@ -17,6 +19,8 @@ class BasicScaffold extends StatefulWidget {
 
 class _BasicScaffoldState extends State<BasicScaffold> {
   Alignment? get alignment => widget.alignment;
+
+  Widget get bottomWidgets => widget.bottomWidgets ?? const SizedBox.shrink();
 
   Widget get body => widget.body;
 
@@ -31,16 +35,23 @@ class _BasicScaffoldState extends State<BasicScaffold> {
         body: SafeArea(
           child: Align(
             alignment: Alignment.topLeft,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                  horizontal: BasicScaffold.marginValue),
-              child: Column(
-                children: [
-                  Expanded(
-                    child: body,
+            child: Column(
+              children: [
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: BasicScaffold.marginValue),
+                    child: Column(
+                      children: [
+                        Expanded(
+                          child: body,
+                        ),
+                      ],
+                    ),
                   ),
-                ],
-              ),
+                ),
+                bottomWidgets,
+              ],
             ),
           ),
         ),

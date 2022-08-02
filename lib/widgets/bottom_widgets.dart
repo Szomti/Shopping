@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shopping/models/model_additional_options.dart';
 import 'package:shopping/view/shopping_list/screen_shopping_list.dart';
-import 'package:shopping/widgets/basic_scaffold.dart';
+
+enum MainPages { home, list }
 
 class BottomWidgets extends StatefulWidget {
   final AdditionalOptionsModel? additionalOptions;
@@ -16,39 +17,41 @@ class BottomWidgets extends StatefulWidget {
 }
 
 class _BottomWidgetsState extends State<BottomWidgets> {
-  static const _divider = Divider(
-    thickness: 1.0,
-    height: 0.0,
-  );
-  static const _iconSize = 24.0;
+  static const _iconSize = 30.0;
   static const _iconColor = Colors.white;
 
-  static final _pageButtonStyle = ElevatedButton.styleFrom(
-    splashFactory: NoSplash.splashFactory,
-    primary: Colors.blue.shade700,
-    fixedSize: const Size.fromWidth(BasicScaffold.marginValue * 5),
-    padding: const EdgeInsets.all(BasicScaffold.marginValue / 3),
-  );
+  static MainPages currentPage = MainPages.home;
 
   AdditionalOptionsModel? get additionalOptions => widget.additionalOptions;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        _divider,
-        ButtonBar(
-          alignment: MainAxisAlignment.center,
-          children: [
-            _createButton(_goToHome, Icons.home_outlined, "Home"),
-            _createButton(_goToList, Icons.list_alt_outlined, "List"),
-          ],
-        ),
-      ],
+    return SizedBox(
+      height: 64.0,
+      child: Row(
+        children: [
+          _createButton(
+            _goToHome,
+            Icons.home_outlined,
+            "Home",
+            MainPages.home,
+          ),
+          _createButton(
+            _goToList,
+            Icons.list_alt_outlined,
+            "Lista",
+            MainPages.list,
+          ),
+        ],
+      ),
     );
   }
 
   void _goToHome() {
+    if (!mounted) return;
+    setState(() {
+      currentPage = MainPages.home;
+    });
     Navigator.pushNamedAndRemoveUntil(
       context,
       "/homeScreen",
@@ -58,6 +61,10 @@ class _BottomWidgetsState extends State<BottomWidgets> {
   }
 
   void _goToList() {
+    if (!mounted) return;
+    setState(() {
+      currentPage = MainPages.list;
+    });
     Navigator.pushNamed(
       context,
       ShoppingListScreen.routeName,
@@ -65,15 +72,26 @@ class _BottomWidgetsState extends State<BottomWidgets> {
     );
   }
 
-  Widget _createButton(void Function() fun, IconData icon, String text) {
-    return ElevatedButton(
-      onPressed: fun,
-      style: _pageButtonStyle,
-      child: Column(
-        children: [
-          _createIcon(icon),
-          Text(text),
-        ],
+  Widget _createButton(
+    void Function() fun,
+    IconData icon,
+    String text,
+    MainPages currentCreate,
+  ) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: fun,
+        child: Container(
+          alignment: Alignment.center,
+          color: _chooseContainerColor(currentCreate),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _createIcon(icon),
+              _createText(text),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -84,5 +102,27 @@ class _BottomWidgetsState extends State<BottomWidgets> {
       size: _iconSize,
       color: _iconColor,
     );
+  }
+
+  Widget _createText(String text) {
+    return Text(
+      text,
+      maxLines: 1,
+      overflow: TextOverflow.fade,
+      softWrap: false,
+      style: const TextStyle(
+        color: Colors.white,
+        fontWeight: FontWeight.w600,
+        fontSize: 16.0,
+      ),
+    );
+  }
+
+  Color _chooseContainerColor(MainPages currentCreate) {
+    if (currentPage == currentCreate) {
+      return Colors.blue;
+    } else {
+      return Colors.blue.shade700;
+    }
   }
 }
