@@ -7,10 +7,7 @@ import 'package:shopping/widgets/bottom_widgets.dart';
 class HomeScreen extends StatefulWidget {
   static const routeName = "/homeScreen";
 
-  final AdditionalOptionsModel? additionalOptions;
-
-  const HomeScreen(
-    this.additionalOptions, {
+  const HomeScreen({
     Key? key,
   }) : super(key: key);
 
@@ -28,22 +25,16 @@ class _HomeScreenState extends State<HomeScreen> {
   AdditionalOptionsModel _additionalOptions =
       AdditionalOptionsModel(usersPrice: false);
 
-  AdditionalOptionsModel? get additionalOptionsModelBack =>
-      widget.additionalOptions;
-
   @override
   void initState() {
     super.initState();
-    if (additionalOptionsModelBack != null) {
-      _additionalOptions = additionalOptionsModelBack!;
-    }
     WidgetsBinding.instance.addPostFrameCallback((_) => loadData());
   }
 
   @override
   Widget build(BuildContext context) {
     return BasicScaffold(
-      bottomWidgets: BottomWidgets(additionalOptions: _additionalOptions),
+      bottomWidgets: BottomWidgets(additionalOptions: () => _additionalOptions),
       body: Column(
         children: [
           const Expanded(

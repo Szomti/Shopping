@@ -5,7 +5,7 @@ import 'package:shopping/view/shopping_list/screen_shopping_list.dart';
 enum MainPages { home, list }
 
 class BottomWidgets extends StatefulWidget {
-  final AdditionalOptionsModel? additionalOptions;
+  final AdditionalOptionsModel Function()? additionalOptions;
 
   const BottomWidgets({
     this.additionalOptions,
@@ -22,7 +22,8 @@ class _BottomWidgetsState extends State<BottomWidgets> {
 
   static MainPages currentPage = MainPages.home;
 
-  AdditionalOptionsModel? get additionalOptions => widget.additionalOptions;
+  AdditionalOptionsModel Function()? get additionalOptions =>
+      widget.additionalOptions;
 
   @override
   Widget build(BuildContext context) {
@@ -56,7 +57,6 @@ class _BottomWidgetsState extends State<BottomWidgets> {
       context,
       "/homeScreen",
       (r) => false,
-      arguments: additionalOptions,
     );
   }
 

@@ -23,25 +23,21 @@ class MyApp extends StatelessWidget {
           case HomeScreen.routeName:
             {
               return PageRouteBuilder(
-                pageBuilder: (a, b, c) => HomeScreen(
-                  settings.arguments as AdditionalOptionsModel?,
-                ),
+                pageBuilder: (a, b, c) => const HomeScreen(),
               );
             }
           case ShoppingListScreen.routeName:
             {
               return PageRouteBuilder(
                 pageBuilder: (a, b, c) => ShoppingListScreen(
-                  settings.arguments as AdditionalOptionsModel?,
+                  settings.arguments as AdditionalOptionsModel Function()?,
                 ),
               );
             }
           default:
             {
               return PageRouteBuilder(
-                pageBuilder: (a, b, c) => HomeScreen(
-                  settings.arguments as AdditionalOptionsModel?,
-                ),
+                pageBuilder: (a, b, c) => const HomeScreen(),
               );
             }
         }

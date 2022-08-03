@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:shopping/widgets/bottom_widgets.dart';
 
 class BasicScaffold extends StatefulWidget {
   static const double marginValue = 16.0;
   final Alignment? alignment;
   final Widget? bottomWidgets;
   final Widget body;
+  final bool showBottomWidgets;
 
   const BasicScaffold({
     this.alignment,
     this.bottomWidgets,
     required this.body,
     Key? key,
-  }) : super(key: key);
+  })  : showBottomWidgets = true,
+        super(key: key);
 
   @override
   State<StatefulWidget> createState() => _BasicScaffoldState();
@@ -20,9 +23,11 @@ class BasicScaffold extends StatefulWidget {
 class _BasicScaffoldState extends State<BasicScaffold> {
   Alignment? get alignment => widget.alignment;
 
-  Widget get bottomWidgets => widget.bottomWidgets ?? const SizedBox.shrink();
+  Widget get bottomWidgets => widget.bottomWidgets ?? const BottomWidgets();
 
   Widget get body => widget.body;
+
+  bool get showBottomWidgets => widget.showBottomWidgets;
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +55,7 @@ class _BasicScaffoldState extends State<BasicScaffold> {
                     ),
                   ),
                 ),
-                bottomWidgets,
+                showBottomWidgets ? bottomWidgets : const SizedBox.shrink(),
               ],
             ),
           ),
