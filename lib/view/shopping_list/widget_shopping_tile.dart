@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:shopping/models/model_is_checked.dart';
 import 'package:shopping/models/model_shopping_item.dart';
 import 'package:shopping/widgets/basic_scaffold.dart';
 
@@ -8,16 +7,12 @@ class ShoppingTileWidget extends StatefulWidget {
   final int index;
   final List<ShoppingItemModel> Function() shoppingListCallback;
   final void Function(List<ShoppingItemModel>) shoppingListSetCallback;
-  final List<IsCheckedModel> Function() isCheckedCallback;
-  final void Function(List<IsCheckedModel>) isCheckedSetCallback;
   final void Function() additionalOptionsCallback;
 
   const ShoppingTileWidget({
     required this.index,
     required this.shoppingListCallback,
     required this.shoppingListSetCallback,
-    required this.isCheckedCallback,
-    required this.isCheckedSetCallback,
     required this.additionalOptionsCallback,
     Key? key,
   }) : super(key: key);
@@ -52,22 +47,14 @@ class _ShoppingTileWidgetState extends State<ShoppingTileWidget> {
   void Function(List<ShoppingItemModel>) get _shoppingListSetCallback =>
       widget.shoppingListSetCallback;
 
-  List<IsCheckedModel> Function() get _isCheckedCallback =>
-      widget.isCheckedCallback;
-
-  void Function(List<IsCheckedModel>) get _isCheckedSetCallback =>
-      widget.isCheckedSetCallback;
-
   Function() get _additionalOptionsCallback => widget.additionalOptionsCallback;
 
   late List<ShoppingItemModel> tempShoppingList;
-  late List<IsCheckedModel> tempIsChekedList;
 
   @override
   void initState() {
     super.initState();
     tempShoppingList = _shoppingListCallback();
-    tempIsChekedList = _isCheckedCallback();
   }
 
   @override
@@ -83,17 +70,17 @@ class _ShoppingTileWidgetState extends State<ShoppingTileWidget> {
               width: 2.0,
             ),
             borderRadius: BorderRadius.circular(BasicScaffold.marginValue / 2),
-            color: tempIsChekedList[_index].isChecked
+            color: tempShoppingList[_index].isChecked
                 ? Colors.black.withOpacity(0.2)
                 : Colors.white,
           ),
           child: Row(
             children: [
               Checkbox(
-                value: tempIsChekedList[_index].isChecked,
+                value: tempShoppingList[_index].isChecked,
                 onChanged: (value) {
-                  tempIsChekedList[_index].isChecked = value!;
-                  _isCheckedSetCallback(tempIsChekedList);
+                  tempShoppingList[_index].isChecked = value!;
+                  _shoppingListSetCallback(tempShoppingList);
                 },
               ),
               Expanded(
@@ -167,9 +154,7 @@ class _ShoppingTileWidgetState extends State<ShoppingTileWidget> {
 
   void _handleRemovePress(int index) {
     tempShoppingList.removeAt(index);
-    tempIsChekedList.removeAt(index);
     _shoppingListSetCallback(tempShoppingList);
-    _isCheckedSetCallback(tempIsChekedList);
   }
 
   void _handleEditPress(int index) {

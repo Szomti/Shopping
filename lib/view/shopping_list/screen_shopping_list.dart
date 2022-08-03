@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shopping/models/model_additional_options.dart';
-import 'package:shopping/models/model_is_checked.dart';
 import 'package:shopping/models/model_shopping_item.dart';
+import 'package:shopping/models/widget_configs/add_shopping_item_config.dart';
+import 'package:shopping/view/shopping_item/screen_add_shopping_item.dart';
 import 'package:shopping/view/shopping_list/widget_shopping_tile.dart';
 import 'package:shopping/widgets/basic_scaffold.dart';
 
@@ -33,8 +34,6 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
   static const ScrollPhysics _scrollPhysics =
       BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics());
 
-  static final _itemController = TextEditingController();
-  static final _amountController = TextEditingController();
   static final _priceTextStyle = TextStyle(
     fontSize: 14.0,
     fontWeight: FontWeight.w600,
@@ -42,8 +41,6 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
   );
 
   static List<ShoppingItemModel> _shoppingList = [];
-  static List<IsCheckedModel> _isChecked = [];
-  static int _currentIndex = 0;
 
   AdditionalOptionsModel? additionalOptions;
 
@@ -74,11 +71,13 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
       body: Column(
         children: [
           _verticalMargin,
-          _verticalMargin,
           _createTopButtons(),
           _verticalMargin,
-          _createTextFields(),
+          _divider,
           _verticalMargin,
+          additionalOptions!.usersPrice == true
+              ? _createTotalPrice()
+              : const SizedBox.shrink(),
           _verticalMargin,
           _divider,
           Expanded(
@@ -86,21 +85,15 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
               physics: _scrollPhysics,
               itemCount: _shoppingList.length,
               itemBuilder: (BuildContext context, int index) {
-                _currentIndex = index;
                 return ShoppingTileWidget(
                   index: index,
                   shoppingListCallback: () => _shoppingList,
                   shoppingListSetCallback: shoppingListSetCallback,
-                  isCheckedCallback: () => _isChecked,
-                  isCheckedSetCallback: isCheckedSetCallback,
                   additionalOptionsCallback: () => additionalOptions,
                 );
               },
             ),
           ),
-          additionalOptions!.usersPrice == true
-              ? _createTotalPrice()
-              : const SizedBox.shrink(),
         ],
       ),
     );
@@ -112,12 +105,6 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
     saveData();
   }
 
-  void isCheckedSetCallback(List<IsCheckedModel> newList) {
-    _isChecked = newList;
-    if (mounted) setState(() {});
-    saveData();
-  }
-
   Widget _createTotalPrice() {
     double totalPrice = 0;
     for (var item in _shoppingList) {
@@ -125,20 +112,13 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
         totalPrice += item.price!;
       }
     }
-    return Column(
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        _divider,
-        _verticalMargin,
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              "Suma: ${totalPrice.toStringAsFixed(2)} zł",
-              style: _priceTextStyle.copyWith(fontSize: 20.0),
-            ),
-          ],
+        Text(
+          "Suma: ${totalPrice.toStringAsFixed(2)} zł",
+          style: _priceTextStyle.copyWith(fontSize: 20.0),
         ),
-        _verticalMargin
       ],
     );
   }
@@ -148,7 +128,14 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         OutlinedButton(
-          onPressed: () => _handleAddPress(_currentIndex),
+          onPressed: () => Navigator.pushNamed(
+            context,
+            AddShoppingItemScreen.routeName,
+            arguments: AddShoppingItemConfig(
+              () => _shoppingList,
+              shoppingListSetCallback,
+            ),
+          ),
           style: OutlinedButton.styleFrom(
             padding: _textFieldPadding,
             primary: Colors.blueAccent,
@@ -166,40 +153,17 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
           ),
           child: const Text("Wyczyść"),
         ),
-      ],
-    );
-  }
-
-  Widget _createTextFields() {
-    return Row(
-      children: [
-        Expanded(
-          flex: 3,
-          child: _createTextField(_amountController, "Ilość"),
-        ),
         _horizontalMargin,
-        Expanded(
-          flex: 9,
-          child: _createTextField(_itemController, "Przedmiot*"),
+        OutlinedButton(
+          onPressed: () => _handleClearSelected(),
+          style: OutlinedButton.styleFrom(
+            padding: _textFieldPadding,
+            primary: Colors.red,
+            side: _borderSide.copyWith(color: Colors.red),
+          ),
+          child: const Text("Usuń Zaznaczone"),
         ),
       ],
-    );
-  }
-
-  Widget _createTextField(
-    TextEditingController controller,
-    String text,
-  ) {
-    return TextField(
-      controller: controller,
-      decoration: InputDecoration(
-        isDense: true,
-        contentPadding: _textFieldPadding,
-        border: const OutlineInputBorder(
-          borderSide: _borderSide,
-        ),
-        labelText: text,
-      ),
     );
   }
 
@@ -215,7 +179,6 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
       onPressed: () {
         setState(() {
           _shoppingList = [];
-          _isChecked = [];
           saveData();
         });
         Navigator.of(context).pop();
@@ -239,21 +202,39 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
     );
   }
 
-  void _handleAddPress(int index) {
-    if (_itemController.text.trim() == "") return;
-
-    ShoppingItemModel shoppingItem = ShoppingItemModel(
-      id: index,
-      name: _itemController.text,
-      amount: _amountController.text,
+  void _handleClearSelected() {
+    Widget cancelButton = TextButton(
+      child: const Text("Anuluj"),
+      onPressed: () {
+        Navigator.of(context).pop();
+      },
     );
-    setState(() {
-      _isChecked.add(IsCheckedModel(isChecked: false));
-      _shoppingList.add(shoppingItem);
-      _itemController.text = "";
-      _amountController.text = "";
-    });
-    saveData();
+    Widget continueButton = TextButton(
+      child: const Text("Zatwierdź"),
+      onPressed: () {
+        setState(() {
+          _shoppingList.removeWhere((element) => (element.isChecked == true));
+          saveData();
+        });
+        Navigator.of(context).pop();
+      },
+    );
+
+    AlertDialog alert = AlertDialog(
+      title: const Text("Uwaga!"),
+      content: const Text("Czy na pewno chcesz usunąć zaznaczone przedmioty?"),
+      actions: [
+        cancelButton,
+        continueButton,
+      ],
+    );
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
   }
 
   void saveData() async {
@@ -261,8 +242,6 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
 
     final String encodedShoppingList = ShoppingItemModel.encode(_shoppingList);
     await prefs.setString('shopping_list', encodedShoppingList);
-    final String encodedIsCheckedList = IsCheckedModel.encode(_isChecked);
-    await prefs.setString('is_checked_list', encodedIsCheckedList);
   }
 
   void loadData() async {
@@ -273,14 +252,6 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
     setState(() {
       _shoppingList = [];
       _shoppingList = ShoppingItemModel.decode(shoppingString);
-    });
-
-    final String isCheckedString =
-        prefs.getString('is_checked_list') ?? "no_list";
-
-    setState(() {
-      _isChecked = [];
-      _isChecked = IsCheckedModel.decode(isCheckedString);
     });
   }
 }

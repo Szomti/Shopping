@@ -1,32 +1,32 @@
 import 'dart:convert';
 
 class ShoppingItemModel {
-  final int id;
   String name;
   String amount;
   double? price;
+  bool isChecked;
 
   ShoppingItemModel({
-    required this.id,
     required this.name,
     required this.amount,
     this.price,
+    this.isChecked = false,
   });
 
   factory ShoppingItemModel.fromJson(Map<String, dynamic> jsonData) {
     return ShoppingItemModel(
-      id: jsonData['id'],
       name: jsonData['name'],
       amount: jsonData['amount'],
       price: jsonData['price'],
+      isChecked: jsonData['isChecked'],
     );
   }
 
   static Map<String, dynamic> toMap(ShoppingItemModel shoppingItem) => {
-        'id': shoppingItem.id,
         'name': shoppingItem.name,
         'amount': shoppingItem.amount,
         'price': shoppingItem.price,
+        'isChecked': shoppingItem.isChecked,
       };
 
   static String encode(List<ShoppingItemModel> shoppingList) => json.encode(
