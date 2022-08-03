@@ -18,7 +18,6 @@ class BottomWidgets extends StatefulWidget {
 
 class _BottomWidgetsState extends State<BottomWidgets> {
   static const _iconSize = 30.0;
-  static const _iconColor = Colors.white;
 
   static MainPages currentPage = MainPages.home;
 
@@ -33,13 +32,15 @@ class _BottomWidgetsState extends State<BottomWidgets> {
         children: [
           _createButton(
             _goToHome,
-            Icons.home_outlined,
+            currentPage == MainPages.home ? Icons.home : Icons.home_outlined,
             "Home",
             MainPages.home,
           ),
           _createButton(
             _goToList,
-            Icons.list_alt_outlined,
+            currentPage == MainPages.list
+                ? Icons.view_list
+                : Icons.view_list_outlined,
             "Lista",
             MainPages.list,
           ),
@@ -87,8 +88,8 @@ class _BottomWidgetsState extends State<BottomWidgets> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              _createIcon(icon),
-              _createText(text),
+              _createIcon(icon, currentCreate),
+              _createText(text, currentCreate),
             ],
           ),
         ),
@@ -96,22 +97,22 @@ class _BottomWidgetsState extends State<BottomWidgets> {
     );
   }
 
-  Widget _createIcon(IconData icon) {
+  Widget _createIcon(IconData icon, MainPages currentCreate) {
     return Icon(
       icon,
       size: _iconSize,
-      color: _iconColor,
+      color: _chooseIconAndTextColor(currentCreate),
     );
   }
 
-  Widget _createText(String text) {
+  Widget _createText(String text, MainPages currentCreate) {
     return Text(
       text,
       maxLines: 1,
       overflow: TextOverflow.fade,
       softWrap: false,
-      style: const TextStyle(
-        color: Colors.white,
+      style: TextStyle(
+        color: _chooseIconAndTextColor(currentCreate),
         fontWeight: FontWeight.w600,
         fontSize: 16.0,
       ),
@@ -120,9 +121,17 @@ class _BottomWidgetsState extends State<BottomWidgets> {
 
   Color _chooseContainerColor(MainPages currentCreate) {
     if (currentPage == currentCreate) {
-      return Colors.blue;
+      return Colors.blue.shade600;
     } else {
       return Colors.blue.shade700;
+    }
+  }
+
+  Color _chooseIconAndTextColor(MainPages currentCreate) {
+    if (currentPage == currentCreate) {
+      return Colors.white;
+    } else {
+      return const Color(0xFFD6d6d6);
     }
   }
 }

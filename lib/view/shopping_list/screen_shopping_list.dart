@@ -74,12 +74,9 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
           _createTopButtons(),
           _verticalMargin,
           _divider,
-          _verticalMargin,
           additionalOptions!.usersPrice == true
               ? _createTotalPrice()
               : const SizedBox.shrink(),
-          _verticalMargin,
-          _divider,
           Expanded(
             child: ListView.builder(
               physics: _scrollPhysics,
@@ -112,13 +109,20 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
         totalPrice += item.price!;
       }
     }
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+    return Column(
       children: [
-        Text(
-          "Suma: ${totalPrice.toStringAsFixed(2)} zł",
-          style: _priceTextStyle.copyWith(fontSize: 20.0),
+        _verticalMargin,
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              "Suma: ${totalPrice.toStringAsFixed(2)} zł",
+              style: _priceTextStyle.copyWith(fontSize: 20.0),
+            ),
+          ],
         ),
+        _verticalMargin,
+        _divider,
       ],
     );
   }
