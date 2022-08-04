@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:shopping/models/model_additional_options.dart';
 import 'package:shopping/models/model_shopping_item.dart';
 import 'package:shopping/models/widget_configs/add_shopping_item_config.dart';
 import 'package:shopping/view/shopping_item/screen_add_shopping_item.dart';
@@ -10,10 +9,7 @@ import 'package:shopping/widgets/basic_scaffold.dart';
 class ShoppingListScreen extends StatefulWidget {
   static const String routeName = "/shoppingList";
 
-  final AdditionalOptionsModel Function()? additionalOptions;
-
-  const ShoppingListScreen(this.additionalOptions, {Key? key})
-      : super(key: key);
+  const ShoppingListScreen({Key? key}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _ShoppingListScreenState();
@@ -42,23 +38,9 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
 
   static List<ShoppingItemModel> _shoppingList = [];
 
-  AdditionalOptionsModel? additionalOptions;
-
-  AdditionalOptionsModel Function()? get _additionalOptions =>
-      widget.additionalOptions;
-
   @override
   void initState() {
     super.initState();
-    if (_additionalOptions == null) {
-      setState(() {
-        additionalOptions = AdditionalOptionsModel();
-      });
-    } else {
-      setState(() {
-        additionalOptions = _additionalOptions!.call();
-      });
-    }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       loadData();
     });
@@ -74,9 +56,7 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
           _createTopButtons(),
           _verticalMargin,
           _divider,
-          additionalOptions!.usersPrice == true
-              ? _createTotalPrice()
-              : const SizedBox.shrink(),
+          _createTotalPrice(),
           Expanded(
             child: ListView.builder(
               physics: _scrollPhysics,
@@ -86,7 +66,6 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
                   index: index,
                   shoppingListCallback: () => _shoppingList,
                   shoppingListSetCallback: shoppingListSetCallback,
-                  additionalOptionsCallback: () => additionalOptions,
                 );
               },
             ),
@@ -102,11 +81,28 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
     saveData();
   }
 
+  double _getPriceMultiplier(ShoppingItemModel item) {
+    if (item.amount == null) return 1;
+    final amount = item.amount!;
+    switch (item.amountType) {
+      case AmountType.basic:
+        return (amount * 1);
+      case AmountType.gram:
+        return (amount * 0.001);
+      case AmountType.kilogram:
+        return (amount * 1);
+      case AmountType.milliliter:
+        return (amount * 0.001);
+      case AmountType.litre:
+        return (amount * 1);
+    }
+  }
+
   Widget _createTotalPrice() {
     double totalPrice = 0;
     for (var item in _shoppingList) {
       if (item.price != null) {
-        totalPrice += item.price!;
+        totalPrice += (item.price! * _getPriceMultiplier(item));
       }
     }
     return Column(
@@ -193,8 +189,13 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
       title: const Text("Uwaga!"),
       content: const Text("Czy na pewno chcesz wyczyścić CAŁĄ listę?"),
       actions: [
-        cancelButton,
-        continueButton,
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            continueButton,
+            cancelButton,
+          ],
+        ),
       ],
     );
 
@@ -228,8 +229,13 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
       title: const Text("Uwaga!"),
       content: const Text("Czy na pewno chcesz usunąć zaznaczone przedmioty?"),
       actions: [
-        cancelButton,
-        continueButton,
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            continueButton,
+            cancelButton,
+          ],
+        ),
       ],
     );
 

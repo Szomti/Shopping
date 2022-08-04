@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:shopping/models/model_additional_options.dart';
 import 'package:shopping/models/widget_configs/add_shopping_item_config.dart';
 import 'package:shopping/view/main/screen_home.dart';
 import 'package:shopping/view/shopping_item/screen_add_shopping_item.dart';
@@ -31,9 +30,7 @@ class MyApp extends StatelessWidget {
           case ShoppingListScreen.routeName:
             {
               return PageRouteBuilder(
-                pageBuilder: (a, b, c) => ShoppingListScreen(
-                  settings.arguments as AdditionalOptionsModel Function()?,
-                ),
+                pageBuilder: (a, b, c) => const ShoppingListScreen(),
               );
             }
           case AddShoppingItemScreen.routeName:

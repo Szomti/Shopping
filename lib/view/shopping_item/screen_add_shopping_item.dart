@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:shopping/models/model_shopping_item.dart';
 import 'package:shopping/models/widget_configs/add_shopping_item_config.dart';
 import 'package:shopping/widgets/basic_scaffold.dart';
@@ -24,8 +25,7 @@ class _AddShoppingItemScreenState extends State<AddShoppingItemScreen> {
   );
   static const _verticalMargin =
       SizedBox(height: BasicScaffold.marginValue / 1.5);
-  static const _horizontalMargin =
-      SizedBox(width: BasicScaffold.marginValue / 2);
+  static const _horizontalMargin = SizedBox(width: BasicScaffold.marginValue);
   static const _borderSide = BorderSide(width: 1.0, color: Colors.blueAccent);
   static const _textFieldPadding =
       EdgeInsets.all(BasicScaffold.marginValue / 1.9);
@@ -34,7 +34,19 @@ class _AddShoppingItemScreenState extends State<AddShoppingItemScreen> {
     fontWeight: FontWeight.w500,
     color: Colors.black,
   );
+  static const _itemErrorText = "To pole musi być wypełnione!";
+  static const _textFieldInnerSize = 16.0;
+  static final _textFieldTextStyle = TextStyle(
+    fontSize: _textFieldInnerSize,
+    color: Colors.black.withOpacity(0.9),
+  );
 
+  static final _amountInputFormatter = [
+    FilteringTextInputFormatter.deny(',', replacementString: '.'),
+    FilteringTextInputFormatter.allow(RegExp(r'(^\d*\.?\d{0,3})')),
+  ];
+
+  final _priceController = TextEditingController();
   final _itemController = TextEditingController();
   final _amountController = TextEditingController();
 
@@ -46,6 +58,10 @@ class _AddShoppingItemScreenState extends State<AddShoppingItemScreen> {
 
   late List<ShoppingItemModel> tempShoppingList;
 
+  AmountType _chosenAmountType = AmountType.basic;
+
+  bool _itemFieldNotValid = false;
+
   @override
   void initState() {
     super.initState();
@@ -54,6 +70,7 @@ class _AddShoppingItemScreenState extends State<AddShoppingItemScreen> {
 
   @override
   void dispose() {
+    _priceController.dispose();
     _itemController.dispose();
     _amountController.dispose();
     super.dispose();
@@ -76,12 +93,60 @@ class _AddShoppingItemScreenState extends State<AddShoppingItemScreen> {
                 _verticalMargin,
                 _divider,
                 _verticalMargin,
-                // _createPriceTextField(),
-                _createTextField(_amountController, "Ilość"),
-                _createTextField(_itemController, "Przedmiot*"),
+                _createPriceTextField("Cena"),
+                _verticalMargin,
+                InputDecorator(
+                  decoration: const InputDecoration(
+                    isDense: true,
+                    contentPadding: _textFieldPadding,
+                    border: OutlineInputBorder(
+                      borderSide: _borderSide,
+                    ),
+                  ),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<AmountType>(
+                      isDense: true,
+                      icon: const FittedBox(
+                        child: Icon(Icons.expand_more_outlined),
+                      ),
+                      dropdownColor: Colors.grey.shade100,
+                      value: _chosenAmountType,
+                      style: _textFieldTextStyle,
+                      items: AmountType.values.map((AmountType amountType) {
+                        return DropdownMenuItem<AmountType>(
+                          alignment: Alignment.bottomLeft,
+                          value: amountType,
+                          child: Text(
+                            amountType.getFullString,
+                          ),
+                        );
+                      }).toList(),
+                      onChanged: (AmountType? newValue) {
+                        _chosenAmountType = newValue!;
+                        if (mounted) setState(() {});
+                      },
+                    ),
+                  ),
+                ),
+                _verticalMargin,
+                _createTextField(
+                  _amountController,
+                  "Ilość",
+                  inputFormatters: _amountInputFormatter,
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
+                ),
+                _verticalMargin,
+                _createTextField(
+                  _itemController,
+                  "Przedmiot*",
+                  errorText: _itemFieldNotValid ? _itemErrorText : null,
+                ),
+                _verticalMargin,
               ],
             ),
           ),
+          _verticalMargin,
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -92,7 +157,10 @@ class _AddShoppingItemScreenState extends State<AddShoppingItemScreen> {
                   primary: Colors.blueAccent,
                   side: _borderSide,
                 ),
-                child: const Text("Zatwierdź"),
+                child: const Text(
+                  "Zatwierdź",
+                  style: TextStyle(fontSize: 18.0),
+                ),
               ),
               _horizontalMargin,
               OutlinedButton(
@@ -102,49 +170,60 @@ class _AddShoppingItemScreenState extends State<AddShoppingItemScreen> {
                   primary: Colors.red,
                   side: _borderSide.copyWith(color: Colors.red),
                 ),
-                child: const Text("Anuluj"),
+                child: const Text(
+                  "Anuluj",
+                  style: TextStyle(fontSize: 18.0),
+                ),
               ),
             ],
           ),
+          _verticalMargin,
         ],
       ),
     );
   }
 
-  // Widget _createPriceTextField() {
-  //   return TextField(
-  //     decoration: const InputDecoration(
-  //       isDense: true,
-  //       contentPadding: EdgeInsets.only(top: 5.0, bottom: 3.0),
-  //       hintText: "Cena",
-  //       helperText: "Cena",
-  //     ),
-  //     keyboardType: const TextInputType.numberWithOptions(decimal: true),
-  //     inputFormatters: [
-  //       FilteringTextInputFormatter.deny(',', replacementString: '.'),
-  //       FilteringTextInputFormatter.allow(RegExp(r'(^\d*\.?\d{0,2}$)')),
-  //     ],
-  //   );
-  // }
+  Widget _createPriceTextField(String text) {
+    return TextField(
+      controller: _priceController,
+      decoration: InputDecoration(
+        isDense: true,
+        contentPadding: _textFieldPadding,
+        border: const OutlineInputBorder(
+          borderSide: _borderSide,
+        ),
+        labelStyle: _textFieldTextStyle,
+        labelText: text,
+      ),
+      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+      inputFormatters: [
+        FilteringTextInputFormatter.deny(',', replacementString: '.'),
+        FilteringTextInputFormatter.allow(RegExp(r'(^\d*\.?\d{0,2}$)')),
+      ],
+    );
+  }
 
   Widget _createTextField(
     TextEditingController controller,
-    String text,
-  ) {
-    return Padding(
-      padding:
-          const EdgeInsets.symmetric(vertical: BasicScaffold.marginValue / 2),
-      child: TextField(
-        controller: controller,
-        decoration: InputDecoration(
-          isDense: true,
-          contentPadding: _textFieldPadding,
-          border: const OutlineInputBorder(
-            borderSide: _borderSide,
-          ),
-          labelText: text,
+    String text, {
+    List<TextInputFormatter>? inputFormatters,
+    TextInputType? keyboardType,
+    String? errorText,
+  }) {
+    return TextField(
+      controller: controller,
+      decoration: InputDecoration(
+        isDense: true,
+        contentPadding: _textFieldPadding,
+        border: const OutlineInputBorder(
+          borderSide: _borderSide,
         ),
+        labelStyle: _textFieldTextStyle,
+        labelText: text,
+        errorText: errorText,
       ),
+      inputFormatters: inputFormatters,
+      keyboardType: keyboardType,
     );
   }
 
@@ -153,11 +232,16 @@ class _AddShoppingItemScreenState extends State<AddShoppingItemScreen> {
   }
 
   void _handleAddPress() {
-    if (_itemController.text.trim() == "") return;
-
+    _itemFieldNotValid = false;
+    if (_itemController.text.trim().isEmpty) {
+      _itemFieldNotValid = true;
+      return;
+    }
     ShoppingItemModel shoppingItem = ShoppingItemModel(
       name: _itemController.text,
-      amount: _amountController.text,
+      amount: double.tryParse(_amountController.text),
+      amountType: _chosenAmountType,
+      price: double.tryParse(_priceController.text),
       isChecked: false,
     );
     tempShoppingList.add(shoppingItem);

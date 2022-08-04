@@ -7,13 +7,11 @@ class ShoppingTileWidget extends StatefulWidget {
   final int index;
   final List<ShoppingItemModel> Function() shoppingListCallback;
   final void Function(List<ShoppingItemModel>) shoppingListSetCallback;
-  final void Function() additionalOptionsCallback;
 
   const ShoppingTileWidget({
     required this.index,
     required this.shoppingListCallback,
     required this.shoppingListSetCallback,
-    required this.additionalOptionsCallback,
     Key? key,
   }) : super(key: key);
 
@@ -47,14 +45,15 @@ class _ShoppingTileWidgetState extends State<ShoppingTileWidget> {
   void Function(List<ShoppingItemModel>) get _shoppingListSetCallback =>
       widget.shoppingListSetCallback;
 
-  Function() get _additionalOptionsCallback => widget.additionalOptionsCallback;
-
   late List<ShoppingItemModel> tempShoppingList;
+
+  late ShoppingItemModel tempShoppingItem;
 
   @override
   void initState() {
     super.initState();
     tempShoppingList = _shoppingListCallback();
+    tempShoppingItem = tempShoppingList.elementAt(_index);
   }
 
   @override
@@ -70,16 +69,16 @@ class _ShoppingTileWidgetState extends State<ShoppingTileWidget> {
               width: 2.0,
             ),
             borderRadius: BorderRadius.circular(BasicScaffold.marginValue / 2),
-            color: tempShoppingList[_index].isChecked
+            color: tempShoppingItem.isChecked
                 ? Colors.black.withOpacity(0.2)
                 : Colors.white,
           ),
           child: Row(
             children: [
               Checkbox(
-                value: tempShoppingList[_index].isChecked,
+                value: tempShoppingItem.isChecked,
                 onChanged: (value) {
-                  tempShoppingList[_index].isChecked = value!;
+                  tempShoppingItem.isChecked = value!;
                   _shoppingListSetCallback(tempShoppingList);
                 },
               ),
@@ -88,9 +87,10 @@ class _ShoppingTileWidgetState extends State<ShoppingTileWidget> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     ..._createPriceOnItem(_index),
-                    tempShoppingList.elementAt(_index).amount.trim() != ""
+                    tempShoppingItem.amount != null
                         ? Text(
-                            "Ilość: ${tempShoppingList.elementAt(_index).amount}",
+                            "${tempShoppingItem.amount} "
+                            "${tempShoppingItem.amountType.getShortString}.",
                             style: _amountTextStyle,
                             softWrap: true,
                             maxLines: 1,
@@ -98,7 +98,7 @@ class _ShoppingTileWidgetState extends State<ShoppingTileWidget> {
                           )
                         : const SizedBox.shrink(),
                     Text(
-                      tempShoppingList.elementAt(_index).name,
+                      tempShoppingItem.name,
                       style: _itemTextStyle,
                       softWrap: true,
                       maxLines: 10,
@@ -136,8 +136,7 @@ class _ShoppingTileWidgetState extends State<ShoppingTileWidget> {
   }
 
   List<Widget> _createPriceOnItem(int index) {
-    if (tempShoppingList.elementAt(index).price == null ||
-        _additionalOptionsCallback.call().usersPrice == false) return [];
+    if (tempShoppingList.elementAt(index).price == null) return [];
     if (tempShoppingList.elementAt(index).price! == 0.00) {
       return [];
     }
@@ -168,33 +167,27 @@ class _ShoppingTileWidgetState extends State<ShoppingTileWidget> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _additionalOptionsCallback.call().usersPrice == true
-                ? TextFormField(
-                    decoration: const InputDecoration(
-                      isDense: true,
-                      contentPadding: EdgeInsets.only(top: 5.0, bottom: 3.0),
-                      hintText: "Cena",
-                      helperText: "Cena",
-                    ),
-                    keyboardType:
-                        const TextInputType.numberWithOptions(decimal: true),
-                    initialValue: tempShoppingList
-                        .elementAt(index)
-                        .price!
-                        .toStringAsFixed(2),
-                    inputFormatters: [
-                      FilteringTextInputFormatter.deny(',',
-                          replacementString: '.'),
-                      FilteringTextInputFormatter.allow(
-                          RegExp(r'(^\d*\.?\d{0,2}$)')),
-                    ],
-                    onChanged: (price) {
-                      if (price.trim() == "") price = "0";
-                      tempShoppingList.elementAt(index).price =
-                          double.parse(double.parse(price).toStringAsFixed(2));
-                    },
-                  )
-                : const SizedBox.shrink(),
+            TextFormField(
+              decoration: const InputDecoration(
+                isDense: true,
+                contentPadding: EdgeInsets.only(top: 5.0, bottom: 3.0),
+                hintText: "Cena",
+                helperText: "Cena",
+              ),
+              keyboardType:
+                  const TextInputType.numberWithOptions(decimal: true),
+              initialValue:
+                  tempShoppingList.elementAt(index).price!.toStringAsFixed(2),
+              inputFormatters: [
+                FilteringTextInputFormatter.deny(',', replacementString: '.'),
+                FilteringTextInputFormatter.allow(RegExp(r'(^\d*\.?\d{0,2})')),
+              ],
+              onChanged: (price) {
+                if (price.trim() == "") price = "0";
+                tempShoppingList.elementAt(index).price =
+                    double.parse(double.parse(price).toStringAsFixed(2));
+              },
+            ),
             TextFormField(
               decoration: const InputDecoration(
                 isDense: true,
@@ -202,9 +195,9 @@ class _ShoppingTileWidgetState extends State<ShoppingTileWidget> {
                 hintText: "Ilość",
                 helperText: "Ilość",
               ),
-              initialValue: tempShoppingList.elementAt(index).amount,
+              initialValue: tempShoppingList.elementAt(index).amount.toString(),
               onChanged: (amount) {
-                tempShoppingList.elementAt(index).amount = amount;
+                tempShoppingList.elementAt(index).amount = double.parse(amount);
               },
             ),
             TextFormField(
@@ -225,7 +218,6 @@ class _ShoppingTileWidgetState extends State<ShoppingTileWidget> {
                 ElevatedButton(
                   onPressed: () {
                     _shoppingListSetCallback(tempShoppingList);
-                    ;
                     Navigator.of(context).pop();
                   },
                   style: ElevatedButton.styleFrom(

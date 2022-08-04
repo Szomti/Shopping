@@ -1,14 +1,56 @@
 import 'dart:convert';
 
+enum AmountType {
+  basic,
+  gram,
+  kilogram,
+  milliliter,
+  litre,
+}
+
+extension AmountTypeExtension on AmountType {
+  String get getShortString {
+    switch (this) {
+      case AmountType.basic:
+        return "szt";
+      case AmountType.gram:
+        return "g";
+      case AmountType.kilogram:
+        return "kg";
+      case AmountType.milliliter:
+        return "ml";
+      case AmountType.litre:
+        return "L";
+    }
+  }
+
+  String get getFullString {
+    switch (this) {
+      case AmountType.basic:
+        return "Sztuki [szt]";
+      case AmountType.gram:
+        return "Gramy [g]";
+      case AmountType.kilogram:
+        return "Kilogramy [kg]";
+      case AmountType.milliliter:
+        return "Mililitry [ml]";
+      case AmountType.litre:
+        return "Litry [L]";
+    }
+  }
+}
+
 class ShoppingItemModel {
   String name;
-  String amount;
+  double? amount;
+  AmountType amountType;
   double? price;
   bool isChecked;
 
   ShoppingItemModel({
     required this.name,
-    required this.amount,
+    this.amount,
+    this.amountType = AmountType.basic,
     this.price,
     this.isChecked = false,
   });
@@ -17,6 +59,7 @@ class ShoppingItemModel {
     return ShoppingItemModel(
       name: jsonData['name'],
       amount: jsonData['amount'],
+      amountType: AmountType.values.byName(jsonData['amountType']),
       price: jsonData['price'],
       isChecked: jsonData['isChecked'],
     );
@@ -25,6 +68,7 @@ class ShoppingItemModel {
   static Map<String, dynamic> toMap(ShoppingItemModel shoppingItem) => {
         'name': shoppingItem.name,
         'amount': shoppingItem.amount,
+        'amountType': shoppingItem.amountType.name,
         'price': shoppingItem.price,
         'isChecked': shoppingItem.isChecked,
       };

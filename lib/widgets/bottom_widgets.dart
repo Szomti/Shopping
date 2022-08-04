@@ -1,14 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:shopping/models/model_additional_options.dart';
 import 'package:shopping/view/shopping_list/screen_shopping_list.dart';
 
 enum MainPages { home, list }
 
 class BottomWidgets extends StatefulWidget {
-  final AdditionalOptionsModel Function()? additionalOptions;
-
   const BottomWidgets({
-    this.additionalOptions,
     Key? key,
   }) : super(key: key);
 
@@ -20,9 +16,6 @@ class _BottomWidgetsState extends State<BottomWidgets> {
   static const _iconSize = 30.0;
 
   static MainPages currentPage = MainPages.home;
-
-  AdditionalOptionsModel Function()? get additionalOptions =>
-      widget.additionalOptions;
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +43,7 @@ class _BottomWidgetsState extends State<BottomWidgets> {
   }
 
   void _goToHome() {
-    if (!mounted) return;
+    if (!mounted || currentPage == MainPages.home) return;
     setState(() {
       currentPage = MainPages.home;
     });
@@ -62,14 +55,13 @@ class _BottomWidgetsState extends State<BottomWidgets> {
   }
 
   void _goToList() {
-    if (!mounted) return;
+    if (!mounted || currentPage == MainPages.list) return;
     setState(() {
       currentPage = MainPages.list;
     });
     Navigator.pushNamed(
       context,
       ShoppingListScreen.routeName,
-      arguments: additionalOptions,
     );
   }
 
